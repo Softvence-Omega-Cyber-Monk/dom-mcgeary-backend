@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MailModule } from './module/mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PartnerModule } from './partner/partner.module';
+import { SeederService } from './seeder/seeder.service';
 
 @Module({
   imports: [ MailerModule.forRootAsync({
@@ -25,8 +27,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           from: config.get<string>('SMTP_FROM') || config.get<string>('SMTP_USER'),
         },
       }),
-    }),AuthModule, PrismaModule, MailModule],
+    }),AuthModule, PrismaModule, MailModule, PartnerModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService , SeederService],
 })
 export class AppModule {}

@@ -24,9 +24,9 @@ import {
   // verifyOtp,
 } from './auth.utils';
 import { MailerService } from '@nestjs-modules/mailer';
-import { StudentLoginDto } from './dto/student-login.dto';
 // import { SystemRole } from '@prisma/client';
 import { RegisterDto } from './dto/register.dto';
+import { UserBirthUpdateDto, UserUpdateDto } from './dto/update-account.dto';
 
 @Injectable()
 export class AuthService {
@@ -68,16 +68,15 @@ export class AuthService {
     if (existingUser) {
       throw new BadRequestException('Email is already registered!');
     }
-
-    if (dto.fullName || dto.email || dto.password) {
+    if (!dto.fullName || !dto.email || !dto.password) {
       throw new BadRequestException('Invalid Credentials!');
     }
-    
+
     const hashedPassword = await bcrypt.hash(
       dto.password,
       parseInt(process.env.SALT_ROUND!),
     );
-   
+
     const newUser = await this.prisma.user.create({
       data: {
         fullName: dto.fullName,
@@ -102,13 +101,9 @@ export class AuthService {
       where: { email: dto.email },
     });
 
-
     if (!user || !dto.password) {
-
       throw new ForbiddenException('Invalid credentials');
     }
-
-              console.log(user)
 
     if (!user.isActive) {
       throw new ForbiddenException('Your account is not Active yet!');
@@ -152,8 +147,8 @@ export class AuthService {
   // }
 
   // change password
-  async changePassword(email: string, dto: ChangePasswordDto) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+  async changePassword(id: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user || !user.password) {
       throw new NotFoundException('User not found');
     }
@@ -170,13 +165,68 @@ export class AuthService {
       parseInt(process.env.SALT_ROUND!),
     );
     await this.prisma.user.update({
-      where: { email },
+      where: { id },
       data: { password: hashed },
     });
 
     return { message: 'Password changed successfully' };
   }
 
+    // Method to get all users with specific fields
+  async getAllUsers() {
+    const users = await this.prisma.user.findMany({
+      select: {
+        fullName: true,
+        email: true,
+        role: true,
+        isActive: true,
+      },
+    });
+    return users;
+  }
+  async updateAccount(id: string, dto: UserUpdateDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: id },
+    });
+
+    if (!existingUser) {
+      throw new BadRequestException('User not Found');
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: id },
+      data: {
+        ...dto,
+      },
+    });
+
+    return { user: updatedUser };
+  }
+
+  //  udpated birthinfo
+
+  async updateBirthInfo(id: string, dto: UserBirthUpdateDto) {
+    // Step 1: Check if the partner exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: id },
+    });
+
+    if (!existingUser) {
+      throw new BadRequestException('User not Found');
+    }
+
+    if (!dto.birthDate || !dto.birthLocation || !dto.birthTime) {
+      throw new BadRequestException('Invalid Credintials');
+    }
+    const updatedUser = await this.prisma.user.update({
+      where: { id: id }, // Find by userId
+      data: {
+        ...dto,
+      },
+    });
+
+    return { user: updatedUser };
+  }
   // forget and reset password
   async requestResetCode(dto: RequestResetCodeDto) {
     const user = await this.prisma.user.findUnique({

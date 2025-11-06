@@ -1,0 +1,18 @@
+enum relationType {
+    WIFE
+    GIRL_FRIEND
+}
+
+model PartnerInfo {
+    id            String       @id @default(uuid())
+    name          String
+    birthDate     String
+    birthTime     String
+    birthLocation String
+    relationType  relationType @default(WIFE)
+
+    userId    String   @unique
+    user      User     @relation(fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
