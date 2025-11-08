@@ -4,7 +4,7 @@ export const swaggerConfig = new DocumentBuilder()
   .setTitle('Romain API Documentation')
   .setDescription('Comprehensive API documentation for the application services')
   .setVersion('1.0')
-  .addCookieAuth('access_token')
+  .addCookieAuth('refreshToken')
   .addTag('API')
   .addApiKey(
     {

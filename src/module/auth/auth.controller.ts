@@ -20,38 +20,72 @@ import {
 } from './dto/forget-reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import type { Request, Response } from 'express';
-import { ApiBody, ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
 import { UserBirthUpdateDto, UserUpdateDto } from './dto/update-account.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { userRole } from '@prisma/client';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  // register
-  //   @Public()
-  //   @Post('request-register-otp')
-  //   async requestRegisterOtp(@Body('email') email: string, @Res() res: Response) {
-  //     const result = await this.authService.requestRegisterOtp(email);
-  //     return sendResponse(res, {
-  //       statusCode: HttpStatus.OK,
-  //       success: true,
-  //       message: 'OTP sent for registration',
-  //       data: result,
-  //     });
-  //   }
+  // refresh token
+  @Public()
+  @Post('refresh-token')
+   @ApiOperation({
+    summary: 'Refresh JWT tokens',
+    description: 'Refreshes the access token using the provided refresh token.',
+  })
+  @ApiBody({
+    description: 'Refresh token for refreshing access token',
+    type: RefreshTokenDto,
+   
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully.',
+  })
+  async refreshToken(
+    @Body('refreshToken') token: string,
+    @Res() res: Response,
+  ) {
+    const result = await this.authService.refreshTokens(token);
+    res.cookie('accessToken', result.access_token, {
+      httpOnly: true, // important for security (prevents client-side access to the cookie)
+      secure: false, // Set to true in production (only send cookie over HTTPS)
+      maxAge: 86400000, // Optional: set expiration time for the cookie (1 hour in this example)
+    });
+
+    res.cookie('refreshToken', result.refresh_token, {
+      httpOnly: true, // important for security (prevents client-side access to the cookie)
+      secure: false, // Set to true in production (only send cookie over HTTPS)
+      maxAge: 604800000, // Optional: set expiration time for the cookie (7 days in this example)
+    });
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Token refreshed',
+      data: result,
+    });
+  }
 
   @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto, @Res() res: Response) {
     const result = await this.authService.register(dto);
-    console.log(result);
-    res.cookie('access_token', result.access_token, {
+
+    res.cookie('accessToken', result.access_token, {
       httpOnly: true, // important for security (prevents client-side access to the cookie)
-      secure: false, // Only send the cookie over HTTPS in production
-      maxAge: 3600000, // Optional: set expiration time for the cookie (1 hour in this example)
+      secure: false, // Set to true in production (only send cookie over HTTPS)
+      maxAge: 86400000, // Optional: set expiration time for the cookie (1 hour in this example)
+    });
+
+    res.cookie('refreshToken', result.refresh_token, {
+      httpOnly: true, // important for security (prevents client-side access to the cookie)
+      secure: false, // Set to true in production (only send cookie over HTTPS)
+      maxAge: 604800000, // Optional: set expiration time for the cookie (7 days in this example)
     });
     return sendResponse(res, {
       statusCode: HttpStatus.CREATED,
@@ -66,11 +100,17 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const result = await this.authService.login(dto);
-    //  res.cookie('access_token', result.access_token, {
-    //   httpOnly: true, // important for security (prevents client-side access to the cookie)
-    //   secure: false,  // Only send the cookie over HTTPS in production
-    //   maxAge: process.env.ACCESS_TOKEN_EXPIREIN as any // Optional: set expiration time for the cookie (1 hour in this example)
-    // });
+    res.cookie('accessToken', result.access_token, {
+      httpOnly: true, // important for security (prevents client-side access to the cookie)
+      secure: false, // Set to true in production (only send cookie over HTTPS)
+      maxAge: 86400000, // Optional: set expiration time for the cookie (1 hour in this example)
+    });
+
+    res.cookie('refreshToken', result.refresh_token, {
+      httpOnly: true, // important for security (prevents client-side access to the cookie)
+      secure: false, // Set to true in production (only send cookie over HTTPS)
+      maxAge: 604800000, // Optional: set expiration time for the cookie (7 days in this example)
+    });
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
       success: true,
@@ -131,7 +171,7 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const result = await this.authService.changePassword(req.user!.email, dto);
+    const result = await this.authService.changePassword(req.user!.id, dto);
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
       success: true,
