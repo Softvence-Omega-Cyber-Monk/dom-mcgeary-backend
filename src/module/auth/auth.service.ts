@@ -27,6 +27,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 // import { SystemRole } from '@prisma/client';
 import { RegisterDto } from './dto/register.dto';
 import { UserBirthUpdateDto, UserUpdateDto } from './dto/update-account.dto';
+import { userRole } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -83,6 +84,7 @@ export class AuthService {
         email: dto.email,
         password: hashedPassword,
         isActive: true,
+        role : userRole.PRO_USER
       },
     });
 
