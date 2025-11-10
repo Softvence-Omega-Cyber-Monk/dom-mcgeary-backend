@@ -247,11 +247,12 @@ export class AuthService {
       data: { email: dto.email, code: hashedCode, expiresAt },
     });
 
-    await this.mailerService.sendMail({
-      to: dto.email,
-      subject: 'Reset Password Code',
-      text: `Your OTP code is ${code}. It will expire in 5 minutes.`,
-    });
+    // await this.mailerService.sendMail({
+    //   to: dto.email,
+    //   subject: 'Reset Password Code',
+    //   text: `Your OTP code is ${code}. It will expire in 5 minutes.`,
+    // });
+    console.log(code)
 
     return { message: 'Reset code sent' };
   }
