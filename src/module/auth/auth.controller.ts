@@ -53,16 +53,11 @@ export class AuthController {
   ) {
     const result = await this.authService.refreshTokens(token);
     res.cookie('accessToken', result.access_token, {
-      httpOnly: true, // important for security (prevents client-side access to the cookie)
-      secure: false, // Set to true in production (only send cookie over HTTPS)
-      maxAge: 86400000, // Optional: set expiration time for the cookie (1 hour in this example)
+      httpOnly: true,
+      secure: false, 
+      sameSite : "none"
     });
 
-    res.cookie('refreshToken', result.refresh_token, {
-      httpOnly: true, // important for security (prevents client-side access to the cookie)
-      secure: false, // Set to true in production (only send cookie over HTTPS)
-      maxAge: 604800000, // Optional: set expiration time for the cookie (7 days in this example)
-    });
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
       success: true,
