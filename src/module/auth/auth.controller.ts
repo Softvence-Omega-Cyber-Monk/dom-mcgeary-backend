@@ -100,14 +100,14 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const result = await this.authService.login(dto);
     res.cookie('accessToken', result.access_token, {
-      httpOnly: true, // Prevents client-side access to the cookie
+      httpOnly: false, // Prevents client-side access to the cookie
       secure: false, // Only true for HTTPS
       maxAge: 86400000, // 1 day expiration
       sameSite: 'none', // Allow cross-origin requests to send the cookie
     });
 
     res.cookie('refreshToken', result.refresh_token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: false, // Only true for HTTPS
       maxAge: 604800000, // 7 days expiration
       sameSite: 'none', // Allow cross-origin requests to send the cookie
