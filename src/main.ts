@@ -14,7 +14,7 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: ["http://localhost:5173","http://localhost:5174","https://dom-mcgeary-frontend.vercel.app/"],
+    origin: ["http://localhost:5173","http://localhost:5174","https://dom-mcgeary-frontend.vercel.app"],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
