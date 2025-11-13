@@ -205,6 +205,21 @@ export class AuthService {
     return { user: updatedUser };
   }
 
+  // get current user
+  async currentUser(id: string) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: id },
+    });
+
+    if (!existingUser) {
+      throw new BadRequestException('User not Found');
+    }
+
+    
+
+    return { user: existingUser };
+  }
+
   //  udpated birthinfo
 
   async updateBirthInfo(id: string, dto: UserBirthUpdateDto) {

@@ -52,15 +52,17 @@ export class AuthController {
   ) {
     const result = await this.authService.refreshTokens(token);
     res.cookie('accessToken', result.access_token, {
-      httpOnly: true, // important for security (prevents client-side access to the cookie)
-      secure: false, // Set to true in production (only send cookie over HTTPS)
-      maxAge: 86400000, // Optional: set expiration time for the cookie (1 hour in this example)
+      httpOnly: false, // Prevents client-side access to the cookie
+      secure: false, // Only true for HTTPS
+      maxAge: 86400000, // 1 day expiration
+      sameSite: 'none', // Allow cross-origin requests to send the cookie
     });
 
     res.cookie('refreshToken', result.refresh_token, {
-      httpOnly: true, // important for security (prevents client-side access to the cookie)
-      secure: false, // Set to true in production (only send cookie over HTTPS)
-      maxAge: 604800000, // Optional: set expiration time for the cookie (7 days in this example)
+      httpOnly: false,
+      secure: false, // Only true for HTTPS
+      maxAge: 604800000, // 7 days expiration
+      sameSite: 'none', // Allow cross-origin requests to send the cookie
     });
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
@@ -75,16 +77,18 @@ export class AuthController {
   async register(@Body() dto: RegisterDto, @Res() res: Response) {
     const result = await this.authService.register(dto);
 
-    res.cookie('accessToken', result.access_token, {
-      httpOnly: true, // important for security (prevents client-side access to the cookie)
-      secure: false, // Set to true in production (only send cookie over HTTPS)
-      maxAge: 86400000, // Optional: set expiration time for the cookie (1 hour in this example)
+     res.cookie('accessToken', result.access_token, {
+      httpOnly: false, // Prevents client-side access to the cookie
+      secure: false, // Only true for HTTPS
+      maxAge: 86400000, // 1 day expiration
+      sameSite: 'none', // Allow cross-origin requests to send the cookie
     });
 
     res.cookie('refreshToken', result.refresh_token, {
-      httpOnly: true, // important for security (prevents client-side access to the cookie)
-      secure: false, // Set to true in production (only send cookie over HTTPS)
-      maxAge: 604800000, // Optional: set expiration time for the cookie (7 days in this example)
+      httpOnly: false,
+      secure: false, // Only true for HTTPS
+      maxAge: 604800000, // 7 days expiration
+      sameSite: 'none', // Allow cross-origin requests to send the cookie
     });
     return sendResponse(res, {
       statusCode: HttpStatus.CREATED,
@@ -161,6 +165,18 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       success: true,
       message: 'Users fetched successfully',
+      data: users,
+    });
+  }
+
+
+  @Get('current-user')
+  async currentUser(@Req() req: Request,@Res() res: Response) {
+    const users = await this.authService.currentUser(req.user!.id);
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'User fetched successfully',
       data: users,
     });
   }
