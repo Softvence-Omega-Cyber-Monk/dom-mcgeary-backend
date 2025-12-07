@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/module/prisma/prisma.service';
 import {
   PartnerInfoCreateDto,
   PartnerInfoUpdateDto,

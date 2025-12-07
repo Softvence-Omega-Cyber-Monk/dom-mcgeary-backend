@@ -2,12 +2,13 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './module/auth/auth.module';
-import { PrismaModule } from './prisma/prisma.module';
+import { PrismaModule } from './module/prisma/prisma.module';
 import { MailModule } from './module/mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PartnerModule } from './partner/partner.module';
 import { SeederService } from './seeder/seeder.service';
+import { AstroligicalProfileModule } from './module/astroligical-profile/astroligical-profile.module';
 
 @Module({
   imports: [ MailerModule.forRootAsync({
@@ -27,7 +28,7 @@ import { SeederService } from './seeder/seeder.service';
           from: config.get<string>('SMTP_FROM') || config.get<string>('SMTP_USER'),
         },
       }),
-    }),AuthModule, PrismaModule, MailModule, PartnerModule],
+    }),AuthModule, PrismaModule, MailModule, PartnerModule, AstroligicalProfileModule],
   controllers: [AppController],
   providers: [AppService , SeederService],
 })

@@ -1,0 +1,39 @@
+model AstrologicalProfile {
+  id              String @id @default(uuid())
+  westernSign     String
+  chineseSign     String
+  corePersonality String
+  element         String
+
+  strengths        String[]
+  challenges       String[]
+  userId           String             @unique
+  user             User               @relation(fields: [userId], references: [id])
+  cosmicGreenLight CosmicGreenLight[] @relation("ProfileCosmicGreenLight") // Defines the one-to-many relation
+  optimalTiming    OptimalTiming[]    @relation("ProfileOptimalTiming")
+  avoidanceZone    AvoidanceZone[]    @relation("ProfileAvoidanceZone")
+}
+
+model CosmicGreenLight {
+  id                    String              @id @default(uuid())
+  title                 String
+  description           String
+  astrologicalProfile   AstrologicalProfile @relation("ProfileCosmicGreenLight", fields: [astrologicalProfileId], references: [id]) // Corrected relation
+  astrologicalProfileId String // Foreign key field that matches the referenced `AstrologicalProfile.id`
+}
+
+model OptimalTiming {
+  id                    String              @id @default(uuid())
+  title                 String
+  description           String
+  astrologicalProfile   AstrologicalProfile @relation("ProfileOptimalTiming", fields: [astrologicalProfileId], references: [id])
+  astrologicalProfileId String // Change to String to match AstrologicalProfile.id
+}
+
+model AvoidanceZone {
+  id                    String              @id @default(uuid())
+  title                 String
+  description           String
+  astrologicalProfile   AstrologicalProfile @relation("ProfileAvoidanceZone", fields: [astrologicalProfileId], references: [id])
+  astrologicalProfileId String // Change to String to match AstrologicalProfile.id
+}

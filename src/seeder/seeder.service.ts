@@ -1,5 +1,5 @@
 import { Injectable, OnApplicationBootstrap, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/module/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { userRole } from '@prisma/client';
 

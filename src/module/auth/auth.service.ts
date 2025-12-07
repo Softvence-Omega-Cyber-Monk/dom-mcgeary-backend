@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/module/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 // import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -37,8 +37,8 @@ export class AuthService {
     private mailerService: MailerService,
   ) {}
 
-  // register
-  //   async requestRegisterOtp(email: string) {
+  // reasyncgister
+  //    requestRegisterOtp(email: string) {
   //     const user = await this.prisma.user.findUnique({ where: { email } });
   //     if (user) {
   //       throw new BadRequestException('Email already registered');
