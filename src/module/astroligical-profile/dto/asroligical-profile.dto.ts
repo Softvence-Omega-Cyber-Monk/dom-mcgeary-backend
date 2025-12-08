@@ -1,105 +1,79 @@
-import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-
-// Define the structure for the array objects
-class TimingOrZone {
-  @IsString()
-  title: string;
-
-  @IsString()
-  description: string;
-}
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional, IsObject } from 'class-validator';
 
 export class CreateAstrologicalProfileDto {
-  @IsString()
-  westernSign: string;
-
-  @IsString()
-  chineseSign: string;
-
-  @IsString()
-  corePersonality: string;
-
-  @IsString()
-  element: string;
-
-  @IsArray()
-  @IsString({ each: true })
-  strengths: string[];
-
-  @IsArray()
-  @IsString({ each: true })
-  challenges: string[];
-
-  @IsString()
-  userId: string; // Reference to User
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TimingOrZone)
-  cosmicGreenLight?: TimingOrZone[]; // Array of objects with title and description
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TimingOrZone)
-  optimalTiming?: TimingOrZone[]; // Array of objects with title and description
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TimingOrZone)
-  avoidanceZone?: TimingOrZone[]; // Array of objects with title and description
-}
-
-
-export class UpdateAstrologicalProfileDto {
-  @IsOptional()
-  @IsString()
-  westernSign?: string;
+  // accept both camelCase and snake_case variants
+  
 
   @IsOptional()
   @IsString()
-  chineseSign?: string;
+  @ApiPropertyOptional({
+    example: '1990-10-15',
+    description: 'Birth date (snake_case)',
+  })
+  @IsOptional()
+  @IsString()
+  birth_date?: string;
+
+ 
 
   @IsOptional()
   @IsString()
-  corePersonality?: string;
+  @ApiPropertyOptional({
+    example: '07:30',
+    description: 'Birth time (snake_case)',
+  })
+  @IsOptional()
+  @IsString()
+  birth_time?: string;
+
+  
 
   @IsOptional()
   @IsString()
-  element?: string;
-
+  @ApiPropertyOptional({
+    example: 'New York, USA',
+    description: 'Birth location (snake_case)',
+  })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  strengths?: string[];
+  @IsString()
+  birth_location?: string;
 
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  challenges?: string[];
+  
 
   @IsOptional()
   @IsString()
-  userId?: string; // Reference to User
+  @ApiPropertyOptional({ example: 'Scorpio' })
+  @IsOptional()
+  @IsString()
+  western_sign?: string;
+
+ 
 
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TimingOrZone)
-  cosmicGreenLight?: TimingOrZone[]; // Array of objects with title and description
+  @IsString()
+  @ApiPropertyOptional({ example: 'Snake' })
+  @IsOptional()
+  @IsString()
+  chinese_sign?: string;
+
+  // accept either an object or a parsed JSON structure for result and roadmap_overview
+  @IsOptional()
+  @IsObject()
+  @ApiPropertyOptional({ description: 'snake_case alias for roadmap_overview' })
+  @IsOptional()
+  @IsObject()
+  result?: Record<string, any>;
+
 
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TimingOrZone)
-  optimalTiming?: TimingOrZone[]; // Array of objects with title and description
+  @IsObject()
+  @ApiPropertyOptional({ description: 'snake_case alias for roadmap_overview' })
+  @IsOptional()
+  @IsObject()
+  roadmap_overview?: Record<string, any>;
 
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TimingOrZone)
-  avoidanceZone?: TimingOrZone[]; // Array of objects with title and description
+  @IsString()
+  userId?: string;
 }

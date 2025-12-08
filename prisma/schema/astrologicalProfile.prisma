@@ -1,39 +1,16 @@
 model AstrologicalProfile {
-  id              String @id @default(uuid())
-  westernSign     String
-  chineseSign     String
-  corePersonality String
-  element         String
+  id                  String             @id @default(uuid())
+  birth_date           String?            @map("birth_date")           // Optional birth_date
+  birth_time           String?            @map("birth_time")           // Optional birth_time
+  birth_location       String?            @map("birth_location")       // Optional birth_location
+  western_sign         String?            @map("western_sign")         // Optional western_sign
+  chinese_sign         String?            @map("chinese_sign")         // Optional chinese_sign
+  
+  // store entire `result` as JSON (matches incoming payload)
+  result              Json?              @map("result")
+  // store the roadmap overview JSON blob from incoming payload
+  roadmap_overview     Json?              @map("roadmap_overview")
+  userId              String?            @unique
+  user                User?              @relation(fields: [userId], references: [id])
 
-  strengths        String[]
-  challenges       String[]
-  userId           String             @unique
-  user             User               @relation(fields: [userId], references: [id])
-  cosmicGreenLight CosmicGreenLight[] @relation("ProfileCosmicGreenLight") // Defines the one-to-many relation
-  optimalTiming    OptimalTiming[]    @relation("ProfileOptimalTiming")
-  avoidanceZone    AvoidanceZone[]    @relation("ProfileAvoidanceZone")
-}
-
-model CosmicGreenLight {
-  id                    String              @id @default(uuid())
-  title                 String
-  description           String
-  astrologicalProfile   AstrologicalProfile @relation("ProfileCosmicGreenLight", fields: [astrologicalProfileId], references: [id]) // Corrected relation
-  astrologicalProfileId String // Foreign key field that matches the referenced `AstrologicalProfile.id`
-}
-
-model OptimalTiming {
-  id                    String              @id @default(uuid())
-  title                 String
-  description           String
-  astrologicalProfile   AstrologicalProfile @relation("ProfileOptimalTiming", fields: [astrologicalProfileId], references: [id])
-  astrologicalProfileId String // Change to String to match AstrologicalProfile.id
-}
-
-model AvoidanceZone {
-  id                    String              @id @default(uuid())
-  title                 String
-  description           String
-  astrologicalProfile   AstrologicalProfile @relation("ProfileAvoidanceZone", fields: [astrologicalProfileId], references: [id])
-  astrologicalProfileId String // Change to String to match AstrologicalProfile.id
 }
