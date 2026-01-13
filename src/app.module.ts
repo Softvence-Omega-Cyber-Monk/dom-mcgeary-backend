@@ -6,9 +6,11 @@ import { PrismaModule } from './module/prisma/prisma.module';
 import { MailModule } from './module/mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PartnerModule } from './partner/partner.module';
+import { PartnerModule } from './module/partner/partner.module';
 import { SeederService } from './seeder/seeder.service';
 import { AstroligicalProfileModule } from './module/astroligical-profile/astroligical-profile.module';
+import { StripeModule } from './module/stripe/stripe.module';
+import { StripeController } from './module/stripe/stripe.controller';
 
 @Module({
   imports: [ MailerModule.forRootAsync({
@@ -28,8 +30,8 @@ import { AstroligicalProfileModule } from './module/astroligical-profile/astroli
           from: config.get<string>('SMTP_FROM') || config.get<string>('SMTP_USER'),
         },
       }),
-    }),AuthModule, PrismaModule, MailModule, PartnerModule, AstroligicalProfileModule],
-  controllers: [AppController],
+    }),AuthModule, PrismaModule, MailModule, PartnerModule, AstroligicalProfileModule, StripeModule],
+  controllers: [AppController, StripeController],
   providers: [AppService , SeederService],
 })
 export class AppModule {}
