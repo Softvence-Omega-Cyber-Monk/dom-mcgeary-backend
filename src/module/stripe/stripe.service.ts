@@ -1,12 +1,14 @@
 // src/stripe/stripe.service.ts
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import Stripe from 'stripe'; // ✅ Correct import
+import { PrismaService } from '../prisma/prisma.service';
+import { UpdatePlanDto } from './dto/strpe.dto';
 
 @Injectable()
 export class StripeService {
   private stripeClient: Stripe;
 
-  constructor() {
+  constructor(private readonly prisma: PrismaService) {
     const secretKey = process.env.STRIPE_SECRET_KEY;
     if (!secretKey) {
       throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
@@ -15,6 +17,61 @@ export class StripeService {
     this.stripeClient = new Stripe(secretKey, {
       apiVersion: '2025-12-15.clover',
     });
+  }
+
+  async createSubscriptionProductAndPrice(
+    productName: string,
+    amount: number,
+    currency: string = 'usd',
+    interval: 'month' | 'year' = 'month',
+    description?: string,
+    features: string[] = [],
+    isPopular = false
+  ) {
+    try {
+      // 1. Create Product in Stripe
+      const product = await this.stripeClient.products.create({
+        name: productName,
+        description: description || undefined,
+        metadata: {
+          created_by: 'your-app',
+          internal_plan_name: productName,
+        },
+      });
+
+      // 2. Create Price in Stripe
+      const price = await this.stripeClient.prices.create({
+        product: product.id,
+        unit_amount: amount * 100,
+        currency,
+        recurring: { interval },
+      });
+
+      // 3. Save Plan in Database
+      const plan = await this.prisma.plan.create({
+        data: {
+          name: productName,
+          description: description || '',
+          priceCents: amount,
+          currency,
+          interval,
+          features: features as any, // Prisma Json type accepts array/object
+          isPopular,
+          stripeProductId: product.id,
+          stripePriceId: price.id,
+        },
+      });
+
+      return {
+        productId: product.id,
+        priceId: price.id,
+        planId: plan.id,
+        plan,
+      };
+    } catch (error) {
+      console.error('Error creating product/price/plan:', error);
+      throw new Error('Failed to create plan and sync with Stripe');
+    }
   }
 
   async createCheckoutSession(userId: string, priceId: string, successUrl: string, cancelUrl: string) {
@@ -26,7 +83,6 @@ export class StripeService {
           quantity: 1,
         },
       ],
-      customer_email: '', // Optional: you can set email later via customer object
       client_reference_id: userId, // Pass user ID to link session to user
       success_url: successUrl,
       cancel_url: cancelUrl,
@@ -34,6 +90,73 @@ export class StripeService {
     });
 
     return session;
+  }
+
+  // GET all plans
+  async findAllPlans() {
+    return this.prisma.plan.findMany({
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+  // UPDATE plan
+  async updatePlan(id: string, updateData: UpdatePlanDto) {
+    // 1. Find existing plan
+    const existingPlan = await this.prisma.plan.findUnique({
+      where: { id },
+    });
+
+    if (!existingPlan) {
+      throw new HttpException('Plan not found', HttpStatus.NOT_FOUND);
+    }
+
+    // 2. Check if price or currency changed
+    const priceChanged =
+      (updateData.priceCents !== undefined && updateData.priceCents !== existingPlan.priceCents) ||
+      (updateData.currency !== undefined && updateData.currency !== existingPlan.currency);
+
+    let newStripePriceId = existingPlan.stripePriceId;
+
+    // 3. If price/currency changed → create new Stripe Price
+    if (priceChanged) {
+      if (!existingPlan.stripeProductId) {
+        throw new Error('Cannot update price: missing stripeProductId');
+      }
+
+      const newPrice = await this.stripeClient.prices.create({
+        product: existingPlan.stripeProductId,
+        unit_amount: updateData.priceCents ?? existingPlan.priceCents,
+        currency: updateData.currency ?? existingPlan.currency,
+        recurring: {
+          interval: existingPlan.interval as 'month' | 'year',
+        },
+      });
+
+      // Optional: Archive old price (good practice)
+      if (existingPlan.stripePriceId) {
+        await this.stripeClient.prices.update(existingPlan.stripePriceId, {
+          active: false,
+        });
+      }
+
+      newStripePriceId = newPrice.id;
+    }
+
+    // 4. Update DB record
+    const updatedPlan = await this.prisma.plan.update({
+      where: { id },
+      data: {
+        name: updateData.name,
+        description: updateData.description,
+        priceCents: updateData.priceCents,
+        currency: updateData.currency,
+        features: updateData.features as any, // Prisma Json
+        isPopular: updateData.isPopular,
+        stripePriceId: newStripePriceId, // update only if changed
+        updatedAt: new Date(),
+      },
+    });
+
+    return updatedPlan;
   }
 
   async handleWebhookEvent(signature: string, payload: Buffer) {
