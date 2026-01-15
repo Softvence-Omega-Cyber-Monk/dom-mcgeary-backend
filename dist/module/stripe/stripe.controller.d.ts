@@ -1,3 +1,4 @@
+import { HttpStatus } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { StripeService } from './stripe.service';
 import { CreateCheckoutSessionDto, CreateProductDto, UpdatePlanDto } from './dto/strpe.dto';
@@ -46,6 +47,37 @@ export declare class StripeController {
             stripeProductId: string | null;
             stripePriceId: string | null;
         }[];
+    }>;
+    getAllSubscriptions(req: Request): Promise<{
+        statusCode: HttpStatus;
+        data: ({
+            user: {
+                email: string;
+                id: string;
+            };
+        } & {
+            id: string;
+            userId: string;
+            status: string;
+            stripeSubscriptionId: string | null;
+            startedAt: Date;
+            endedAt: Date | null;
+            planId: string;
+        })[];
+        count: number;
+    }>;
+    getUserSubscriptions(req: Request): Promise<{
+        statusCode: HttpStatus;
+        data: {
+            id: string;
+            userId: string;
+            status: string;
+            stripeSubscriptionId: string | null;
+            startedAt: Date;
+            endedAt: Date | null;
+            planId: string;
+        }[];
+        count: number;
     }>;
     updatePlan(id: string, dto: UpdatePlanDto): Promise<{
         success: boolean;

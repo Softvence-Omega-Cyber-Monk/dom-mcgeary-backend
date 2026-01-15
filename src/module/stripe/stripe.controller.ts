@@ -111,6 +111,35 @@ export class StripeController {
     }
   }
 
+
+
+   // 🔒 Admin-only: get ALL subscriptions
+   @Public()
+  @Get()
+  async getAllSubscriptions(@Req() req: Request) {
+    // Optional: restrict to admin role
+    // if (req.user.role !== 'ADMIN') throw new ForbiddenException();
+
+    const subscriptions = await this.stripeService.findAllSubscriptions();
+    return {
+      statusCode: HttpStatus.OK,
+      data: subscriptions,
+      count: subscriptions.length,
+    };
+  }
+
+  // 👤 User-only: get MY subscriptions
+  @Get('me')
+  async getUserSubscriptions(@Req() req : Request) {
+    const subscriptions = await this.stripeService.findSubscriptionsByUserId(
+      req.user!.id,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: subscriptions,
+      count: subscriptions.length,
+    };
+  }
   // PATCH /stripe/plans/:id
   @Public()
   @Patch('plans/:id')
@@ -151,4 +180,6 @@ export class StripeController {
       res.status(400).send(`Webhook Error: ${err.message}`);
     }
   }
+
+
 }

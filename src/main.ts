@@ -6,6 +6,7 @@ import { JwtGuard } from './common/guards/jwt.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { setupSwagger } from './swagger/swagger.setup';
 import { ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -13,11 +14,14 @@ async function bootstrap() {
     bodyParser: true,
   });
 
+    app.use('/api/v1/stripe/webhook', express.raw({ type: 'application/json' }));
+
   app.enableCors({
     origin: ["http://localhost:5173","http://localhost:5174","https://dom-mcgeary-frontend.vercel.app"],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+
 
   const reflector = app.get(Reflector);
   const prisma = app.get(PrismaService);

@@ -58,4 +58,27 @@ export declare class StripeService {
     }>;
     private handleCheckoutSessionCompleted;
     private handleSubscriptionEvent;
+    findAllSubscriptions(): Promise<({
+        user: {
+            email: string;
+            id: string;
+        };
+    } & {
+        id: string;
+        userId: string;
+        status: string;
+        stripeSubscriptionId: string | null;
+        startedAt: Date;
+        endedAt: Date | null;
+        planId: string;
+    })[]>;
+    findSubscriptionsByUserId(userId: string): Promise<{
+        id: string;
+        userId: string;
+        status: string;
+        stripeSubscriptionId: string | null;
+        startedAt: Date;
+        endedAt: Date | null;
+        planId: string;
+    }[]>;
 }

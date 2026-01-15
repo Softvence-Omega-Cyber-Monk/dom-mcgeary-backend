@@ -70,6 +70,22 @@ let StripeController = class StripeController {
             throw new common_1.HttpException('Failed to fetch plans', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    async getAllSubscriptions(req) {
+        const subscriptions = await this.stripeService.findAllSubscriptions();
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            data: subscriptions,
+            count: subscriptions.length,
+        };
+    }
+    async getUserSubscriptions(req) {
+        const subscriptions = await this.stripeService.findSubscriptionsByUserId(req.user.id);
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            data: subscriptions,
+            count: subscriptions.length,
+        };
+    }
     async updatePlan(id, dto) {
         try {
             const updatedPlan = await this.stripeService.updatePlan(id, dto);
@@ -127,6 +143,21 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], StripeController.prototype, "findAllPlans", null);
+__decorate([
+    (0, public_decorators_1.Public)(),
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], StripeController.prototype, "getAllSubscriptions", null);
+__decorate([
+    (0, common_1.Get)('me'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], StripeController.prototype, "getUserSubscriptions", null);
 __decorate([
     (0, public_decorators_1.Public)(),
     (0, common_1.Patch)('plans/:id'),

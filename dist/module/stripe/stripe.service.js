@@ -261,6 +261,23 @@ let StripeService = class StripeService {
         }
         console.log(`🔄 Subscription ${stripeSubscriptionId} updated to: ${mappedStatus}`);
     }
+    async findAllSubscriptions() {
+        return this.prisma.subscription.findMany({
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                    },
+                },
+            },
+        });
+    }
+    async findSubscriptionsByUserId(userId) {
+        return this.prisma.subscription.findMany({
+            where: { userId },
+        });
+    }
 };
 exports.StripeService = StripeService;
 exports.StripeService = StripeService = __decorate([

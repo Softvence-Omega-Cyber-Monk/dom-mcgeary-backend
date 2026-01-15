@@ -42,7 +42,7 @@ export class StripeService {
       // 2. Create Price in Stripe
       const price = await this.stripeClient.prices.create({
         product: product.id,
-        unit_amount: amount ,
+        unit_amount: amount,
         currency,
         recurring: { interval },
       });
@@ -210,7 +210,7 @@ export class StripeService {
       where: { id: userId },
       data: {
         isActive: true,
-        stripeCustomerId: customerId, 
+        stripeCustomerId: customerId,
         // You may need to add `stripeCustomerId` field to User model
       },
     });
@@ -319,5 +319,31 @@ export class StripeService {
     }
 
     console.log(`🔄 Subscription ${stripeSubscriptionId} updated to: ${mappedStatus}`);
+  }
+
+
+
+  async findAllSubscriptions() {
+    return this.prisma.subscription.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+      // orderBy: {
+      //   createdAt: 'desc',
+      // },
+    });
+  }
+
+  // Optional: Get subscriptions for current user
+  async findSubscriptionsByUserId(userId: string) {
+    return this.prisma.subscription.findMany({
+      where: { userId },
+      // orderBy: { createdAt: 'desc' },
+    });
   }
 }
