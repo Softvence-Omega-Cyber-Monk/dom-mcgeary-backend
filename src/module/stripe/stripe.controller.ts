@@ -5,7 +5,7 @@ import type { Request, Response } from 'express';
 import { StripeService } from './stripe.service';
 import { AuthGuard } from '@nestjs/passport'; // assuming you have auth
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
-import { CreateProductDto, UpdatePlanDto } from './dto/strpe.dto';
+import { CreateCheckoutSessionDto, CreateProductDto, UpdatePlanDto } from './dto/strpe.dto';
 import { Public } from 'src/common/decorators/public.decorators';
 @Controller('stripe')
 export class StripeController {
@@ -67,14 +67,18 @@ export class StripeController {
   }
 
   @Post('create-checkout-session')
-  async createCheckoutSession(@Req() req: Request) {
-    const userId = req.user!.id; // Assuming you have user ID in JWT
+  async createCheckoutSession(
+    @Req() req: Request,
+    @Body() dto: CreateCheckoutSessionDto
+  ) {
+    const userId = req.user!.id; // From JWTAuthGuard
+    const { priceId } = dto;
+
     const successUrl = `${process.env.FRONTEND_URL}/subscription-success`;
     const cancelUrl = `${process.env.FRONTEND_URL}/subscription-cancel`;
-    const priceId = process.env.STRIPE_MONTHLY_PRICE_ID as string;
 
+    console.log('Creating checkout session:', { userId, priceId });
 
-    console.log('fds', userId, successUrl, cancelUrl, priceId)
     const session = await this.stripeService.createCheckoutSession(
       userId,
       priceId,
@@ -82,10 +86,11 @@ export class StripeController {
       cancelUrl
     );
 
-    console.log(session)
-    return { sessionId: session.id };
+    return {
+      success: true,
+      url: session.url, // Redirect frontend to this URL
+    };
   }
-
   // GET /stripe/plans → returns all plans
   @Public()
   @Get('plans')
@@ -137,7 +142,7 @@ export class StripeController {
   async webhook(@Req() req: Request, @Res() res: Response) {
     const sig = req.headers['stripe-signature'] as string;
     const rawBody = req.body;
-     console.log(rawBody , 'fasdfasdfsdaf')
+    console.log(rawBody, 'fasdfasdfsdaf')
     try {
       await this.stripeService.handleWebhookEvent(sig, rawBody);
       res.status(200).json({ received: true });

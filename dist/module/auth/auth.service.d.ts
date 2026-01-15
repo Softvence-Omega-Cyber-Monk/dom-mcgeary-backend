@@ -27,6 +27,7 @@ export declare class AuthService {
             timeZone: string | null;
             phone: string | null;
             profileImage: string | null;
+            stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
             updatedAt: Date;
@@ -48,6 +49,7 @@ export declare class AuthService {
             timeZone: string | null;
             phone: string | null;
             profileImage: string | null;
+            stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
             updatedAt: Date;
@@ -80,6 +82,7 @@ export declare class AuthService {
             timeZone: string | null;
             phone: string | null;
             profileImage: string | null;
+            stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
             updatedAt: Date;
@@ -99,6 +102,7 @@ export declare class AuthService {
             timeZone: string | null;
             phone: string | null;
             profileImage: string | null;
+            stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
             updatedAt: Date;
@@ -118,6 +122,7 @@ export declare class AuthService {
             timeZone: string | null;
             phone: string | null;
             profileImage: string | null;
+            stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
             updatedAt: Date;

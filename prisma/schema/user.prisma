@@ -15,6 +15,7 @@ model User {
     birthTime     String?
     birthLocation String?
     timeZone      String?
+    stripeCustomerId  String ?
     role          userRole @default(USER)
 
     partnerInfo  PartnerInfo ? @relation

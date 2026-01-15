@@ -41,7 +41,7 @@ let StripeService = class StripeService {
             });
             const price = await this.stripeClient.prices.create({
                 product: product.id,
-                unit_amount: amount * 100,
+                unit_amount: amount,
                 currency,
                 recurring: { interval },
             });
@@ -165,13 +165,101 @@ let StripeService = class StripeService {
         const userId = session.client_reference_id;
         const customerId = session.customer;
         const subscriptionId = session.subscription;
-        console.log('Checkout completed for user:', userId);
+        if (!userId) {
+            console.warn('No client_reference_id in session:', session.id);
+            return;
+        }
+        console.log(`✅ Checkout completed for user: ${userId}`);
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                isActive: true,
+                stripeCustomerId: customerId,
+            },
+        });
+        const priceId = session.line_items?.data[0]?.price?.id;
+        if (!priceId) {
+            throw new Error('Price ID not found in session');
+        }
+        const plan = await this.prisma.plan.findFirst({
+            where: { stripePriceId: priceId },
+        });
+        if (!plan) {
+            console.error('Plan not found for price ID:', priceId);
+            return;
+        }
+        await this.prisma.subscription.create({
+            data: {
+                userId,
+                planId: plan.id,
+                status: 'active',
+                stripeSubscriptionId: subscriptionId,
+                startedAt: new Date(),
+            },
+        });
     }
     async handleSubscriptionEvent(subscription) {
-        const customerId = subscription.customer;
+        const stripeSubscriptionId = subscription.id;
         const status = subscription.status;
-        const planId = subscription.items.data[0].price.product;
-        console.log('Subscription updated:', subscription.id, status);
+        const priceId = subscription.items.data[0]?.price?.id;
+        if (!priceId) {
+            console.warn('No price ID in subscription:', stripeSubscriptionId);
+            return;
+        }
+        const plan = await this.prisma.plan.findFirst({
+            where: { stripePriceId: priceId },
+        });
+        if (!plan) {
+            console.warn('Plan not found for price:', priceId);
+            return;
+        }
+        let dbSub = await this.prisma.subscription.findFirst({
+            where: { stripeSubscriptionId },
+        });
+        const statusMap = {
+            active: 'active',
+            trialing: 'active',
+            past_due: 'past_due',
+            unpaid: 'canceled',
+            canceled: 'canceled',
+            incomplete: 'canceled',
+            incomplete_expired: 'canceled',
+        };
+        const mappedStatus = statusMap[status] || 'canceled';
+        if (dbSub) {
+            await this.prisma.subscription.update({
+                where: { id: dbSub.id },
+                data: {
+                    status: mappedStatus,
+                    endedAt: status === 'canceled' ? new Date() : null,
+                },
+            });
+            if (mappedStatus === 'canceled') {
+                await this.prisma.user.updateMany({
+                    where: { id: dbSub.userId },
+                    data: { isActive: false },
+                });
+            }
+        }
+        else {
+            const customerId = subscription.customer;
+            const user = await this.prisma.user.findFirst({
+                where: {},
+            });
+            if (user) {
+                await this.prisma.subscription.create({
+                    data: {
+                        userId: user.id,
+                        planId: plan.id,
+                        status: mappedStatus,
+                        stripeSubscriptionId,
+                        startedAt: new Date(subscription.start_date * 1000),
+                        endedAt: status === 'canceled' ? new Date() : null,
+                    },
+                });
+            }
+        }
+        console.log(`🔄 Subscription ${stripeSubscriptionId} updated to: ${mappedStatus}`);
     }
 };
 exports.StripeService = StripeService;

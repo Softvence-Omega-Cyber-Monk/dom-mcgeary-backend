@@ -45,15 +45,17 @@ let StripeController = class StripeController {
             throw new common_1.HttpException(error.message || 'Failed to create plan and sync with Stripe', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    async createCheckoutSession(req) {
+    async createCheckoutSession(req, dto) {
         const userId = req.user.id;
+        const { priceId } = dto;
         const successUrl = `${process.env.FRONTEND_URL}/subscription-success`;
         const cancelUrl = `${process.env.FRONTEND_URL}/subscription-cancel`;
-        const priceId = process.env.STRIPE_MONTHLY_PRICE_ID;
-        console.log('fds', userId, successUrl, cancelUrl, priceId);
+        console.log('Creating checkout session:', { userId, priceId });
         const session = await this.stripeService.createCheckoutSession(userId, priceId, successUrl, cancelUrl);
-        console.log(session);
-        return { sessionId: session.id };
+        return {
+            success: true,
+            url: session.url,
+        };
     }
     async findAllPlans() {
         try {
@@ -112,8 +114,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)('create-checkout-session'),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, strpe_dto_1.CreateCheckoutSessionDto]),
     __metadata("design:returntype", Promise)
 ], StripeController.prototype, "createCheckoutSession", null);
 __decorate([

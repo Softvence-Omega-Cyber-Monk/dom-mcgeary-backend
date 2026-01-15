@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdatePlanDto = exports.CreateProductDto = void 0;
+exports.CreateCheckoutSessionDto = exports.UpdatePlanDto = exports.CreateProductDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateProductDto {
@@ -156,4 +156,17 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
 ], UpdatePlanDto.prototype, "isPopular", void 0);
+class CreateCheckoutSessionDto {
+    priceId;
+}
+exports.CreateCheckoutSessionDto = CreateCheckoutSessionDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Stripe Price ID (e.g., price_123...)',
+        example: 'price_1Nxabc...',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateCheckoutSessionDto.prototype, "priceId", void 0);
 //# sourceMappingURL=strpe.dto.js.map

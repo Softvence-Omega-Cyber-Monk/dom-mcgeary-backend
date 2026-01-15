@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { StripeService } from './stripe.service';
-import { CreateProductDto, UpdatePlanDto } from './dto/strpe.dto';
+import { CreateCheckoutSessionDto, CreateProductDto, UpdatePlanDto } from './dto/strpe.dto';
 export declare class StripeController {
     private readonly stripeService;
     constructor(stripeService: StripeService);
@@ -26,8 +26,9 @@ export declare class StripeController {
             priceId: string;
         };
     }>;
-    createCheckoutSession(req: Request): Promise<{
-        sessionId: string;
+    createCheckoutSession(req: Request, dto: CreateCheckoutSessionDto): Promise<{
+        success: boolean;
+        url: string | null;
     }>;
     findAllPlans(): Promise<{
         success: boolean;

@@ -1,7 +1,7 @@
 // create-product.dto.ts
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsIn, Min, IsBoolean, IsArray } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsIn, Min, IsBoolean, IsArray, IsNotEmpty } from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({
@@ -118,4 +118,16 @@ export class UpdatePlanDto {
   @IsBoolean()
   @IsOptional()
   isPopular?: boolean;
+}
+
+
+
+export class CreateCheckoutSessionDto {
+  @ApiProperty({
+    description: 'Stripe Price ID (e.g., price_123...)',
+    example: 'price_1Nxabc...',
+  })
+  @IsString()
+  @IsNotEmpty()
+  priceId: string;
 }

@@ -15,3 +15,6 @@ export declare class UpdatePlanDto {
     features?: string[];
     isPopular?: boolean;
 }
+export declare class CreateCheckoutSessionDto {
+    priceId: string;
+}
