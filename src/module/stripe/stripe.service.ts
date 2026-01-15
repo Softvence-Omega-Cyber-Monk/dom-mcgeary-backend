@@ -215,12 +215,20 @@ export class StripeService {
       },
     });
 
-    // 2. Find Plan from session
-    const priceId = session.line_items?.data[0]?.price?.id;
+    // 🔥 Fetch the session with line_items expanded
+    const fullSession = await this.stripeClient.checkout.sessions.retrieve(
+      session.id,
+      {
+        expand: ['line_items'], // ← critical!
+      }
+    );
+
+    const priceId = fullSession.line_items?.data[0]?.price?.id;
     if (!priceId) {
-      throw new Error('Price ID not found in session');
+      throw new Error(`Price ID not found in session ${session.id}`);
     }
 
+    console.log(`✅ Checkout completed for user: ${userId}, priceId: ${priceId}`);
     const plan = await this.prisma.plan.findFirst({
       where: { stripePriceId: priceId },
     });
