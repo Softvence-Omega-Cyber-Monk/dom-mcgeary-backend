@@ -62,6 +62,7 @@ export declare class StripeService {
         user: {
             email: string;
             id: string;
+            fullName: string;
         };
     } & {
         id: string;
@@ -72,7 +73,13 @@ export declare class StripeService {
         endedAt: Date | null;
         planId: string;
     })[]>;
-    findSubscriptionsByUserId(userId: string): Promise<{
+    findSubscriptionById(subscriptionId: string): Promise<({
+        user: {
+            email: string;
+            id: string;
+            fullName: string;
+        };
+    } & {
         id: string;
         userId: string;
         status: string;
@@ -80,5 +87,5 @@ export declare class StripeService {
         startedAt: Date;
         endedAt: Date | null;
         planId: string;
-    }[]>;
+    }) | null>;
 }

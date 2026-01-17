@@ -113,9 +113,9 @@ export class StripeController {
 
 
 
-   // 🔒 Admin-only: get ALL subscriptions
-   @Public()
-  @Get()
+  // 🔒 Admin-only: get ALL subscriptions
+  @Public()
+  @Get('get-all-subscription')
   async getAllSubscriptions(@Req() req: Request) {
     // Optional: restrict to admin role
     // if (req.user.role !== 'ADMIN') throw new ForbiddenException();
@@ -128,18 +128,7 @@ export class StripeController {
     };
   }
 
-  // 👤 User-only: get MY subscriptions
-  @Get('me')
-  async getUserSubscriptions(@Req() req : Request) {
-    const subscriptions = await this.stripeService.findSubscriptionsByUserId(
-      req.user!.id,
-    );
-    return {
-      statusCode: HttpStatus.OK,
-      data: subscriptions,
-      count: subscriptions.length,
-    };
-  }
+
   // PATCH /stripe/plans/:id
   @Public()
   @Patch('plans/:id')
@@ -179,6 +168,36 @@ export class StripeController {
       console.error('Webhook error:', err.message);
       res.status(400).send(`Webhook Error: ${err.message}`);
     }
+  }
+
+
+  @Get('subscriptionDetails/:subscriptionId')
+  async getUserSubscription(
+    @Req() req: Request,
+    @Param('subscriptionId') subscriptionId: string,
+  ) {
+    if (!subscriptionId) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'subscriptionId is required',
+      };
+    }
+
+    const subscription = await this.stripeService.findSubscriptionById(
+      subscriptionId,
+    );
+
+    if (!subscription) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Subscription not found or access denied',
+      };
+    }
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: subscription,
+    };
   }
 
 

@@ -42,7 +42,7 @@ export class StripeService {
       // 2. Create Price in Stripe
       const price = await this.stripeClient.prices.create({
         product: product.id,
-        unit_amount: amount,
+        unit_amount: amount * 100,
         currency,
         recurring: { interval },
       });
@@ -52,7 +52,7 @@ export class StripeService {
         data: {
           name: productName,
           description: description || '',
-          priceCents: amount,
+          priceCents: amount ,
           currency,
           interval,
           features: features as any, // Prisma Json type accepts array/object
@@ -338,6 +338,7 @@ export class StripeService {
           select: {
             id: true,
             email: true,
+            fullName:true
           },
         },
       },
@@ -348,10 +349,21 @@ export class StripeService {
   }
 
   // Optional: Get subscriptions for current user
-  async findSubscriptionsByUserId(userId: string) {
-    return this.prisma.subscription.findMany({
-      where: { userId },
-      // orderBy: { createdAt: 'desc' },
-    });
-  }
+async findSubscriptionById(subscriptionId: string) {
+  return this.prisma.subscription.findFirst({
+    where: {
+      id: subscriptionId,
+      
+    },
+     include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            fullName:true
+          },
+        },
+      },
+  });
+}
 }

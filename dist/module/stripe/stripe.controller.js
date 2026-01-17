@@ -78,14 +78,6 @@ let StripeController = class StripeController {
             count: subscriptions.length,
         };
     }
-    async getUserSubscriptions(req) {
-        const subscriptions = await this.stripeService.findSubscriptionsByUserId(req.user.id);
-        return {
-            statusCode: common_1.HttpStatus.OK,
-            data: subscriptions,
-            count: subscriptions.length,
-        };
-    }
     async updatePlan(id, dto) {
         try {
             const updatedPlan = await this.stripeService.updatePlan(id, dto);
@@ -114,6 +106,25 @@ let StripeController = class StripeController {
             console.error('Webhook error:', err.message);
             res.status(400).send(`Webhook Error: ${err.message}`);
         }
+    }
+    async getUserSubscription(req, subscriptionId) {
+        if (!subscriptionId) {
+            return {
+                statusCode: common_1.HttpStatus.BAD_REQUEST,
+                message: 'subscriptionId is required',
+            };
+        }
+        const subscription = await this.stripeService.findSubscriptionById(subscriptionId);
+        if (!subscription) {
+            return {
+                statusCode: common_1.HttpStatus.NOT_FOUND,
+                message: 'Subscription not found or access denied',
+            };
+        }
+        return {
+            statusCode: common_1.HttpStatus.OK,
+            data: subscription,
+        };
     }
 };
 exports.StripeController = StripeController;
@@ -145,19 +156,12 @@ __decorate([
 ], StripeController.prototype, "findAllPlans", null);
 __decorate([
     (0, public_decorators_1.Public)(),
-    (0, common_1.Get)(),
+    (0, common_1.Get)('get-all-subscription'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], StripeController.prototype, "getAllSubscriptions", null);
-__decorate([
-    (0, common_1.Get)('me'),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], StripeController.prototype, "getUserSubscriptions", null);
 __decorate([
     (0, public_decorators_1.Public)(),
     (0, common_1.Patch)('plans/:id'),
@@ -178,6 +182,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], StripeController.prototype, "webhook", null);
+__decorate([
+    (0, common_1.Get)('subscriptionDetails/:subscriptionId'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('subscriptionId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], StripeController.prototype, "getUserSubscription", null);
 exports.StripeController = StripeController = __decorate([
     (0, common_1.Controller)('stripe'),
     __metadata("design:paramtypes", [stripe_service_1.StripeService])

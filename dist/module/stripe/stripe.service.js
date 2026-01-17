@@ -41,7 +41,7 @@ let StripeService = class StripeService {
             });
             const price = await this.stripeClient.prices.create({
                 product: product.id,
-                unit_amount: amount,
+                unit_amount: amount * 100,
                 currency,
                 recurring: { interval },
             });
@@ -272,14 +272,26 @@ let StripeService = class StripeService {
                     select: {
                         id: true,
                         email: true,
+                        fullName: true
                     },
                 },
             },
         });
     }
-    async findSubscriptionsByUserId(userId) {
-        return this.prisma.subscription.findMany({
-            where: { userId },
+    async findSubscriptionById(subscriptionId) {
+        return this.prisma.subscription.findFirst({
+            where: {
+                id: subscriptionId,
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                        fullName: true
+                    },
+                },
+            },
         });
     }
 };

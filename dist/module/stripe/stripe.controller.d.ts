@@ -54,6 +54,7 @@ export declare class StripeController {
             user: {
                 email: string;
                 id: string;
+                fullName: string;
             };
         } & {
             id: string;
@@ -64,19 +65,6 @@ export declare class StripeController {
             endedAt: Date | null;
             planId: string;
         })[];
-        count: number;
-    }>;
-    getUserSubscriptions(req: Request): Promise<{
-        statusCode: HttpStatus;
-        data: {
-            id: string;
-            userId: string;
-            status: string;
-            stripeSubscriptionId: string | null;
-            startedAt: Date;
-            endedAt: Date | null;
-            planId: string;
-        }[];
         count: number;
     }>;
     updatePlan(id: string, dto: UpdatePlanDto): Promise<{
@@ -98,4 +86,27 @@ export declare class StripeController {
         };
     }>;
     webhook(req: Request, res: Response): Promise<void>;
+    getUserSubscription(req: Request, subscriptionId: string): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data?: undefined;
+    } | {
+        statusCode: HttpStatus;
+        data: {
+            user: {
+                email: string;
+                id: string;
+                fullName: string;
+            };
+        } & {
+            id: string;
+            userId: string;
+            status: string;
+            stripeSubscriptionId: string | null;
+            startedAt: Date;
+            endedAt: Date | null;
+            planId: string;
+        };
+        message?: undefined;
+    }>;
 }
