@@ -29,10 +29,38 @@ const update_account_dto_1 = require("./dto/update-account.dto");
 const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const client_1 = require("@prisma/client");
 const refresh_token_dto_1 = require("./dto/refresh-token.dto");
+const passport_1 = require("@nestjs/passport");
+const prisma_service_1 = require("../prisma/prisma.service");
+const jwt_1 = require("@nestjs/jwt");
+const auth_utils_1 = require("./auth.utils");
 let AuthController = class AuthController {
     authService;
-    constructor(authService) {
+    jwtService;
+    prisma;
+    constructor(authService, jwtService, prisma) {
         this.authService = authService;
+        this.jwtService = jwtService;
+        this.prisma = prisma;
+    }
+    googleAuth() { }
+    async googleAuthCallback(req, res) {
+        try {
+            const { user: googleProfile } = req;
+            const user = await this.authService.handleGoogleLogin(googleProfile);
+            const payload = {
+                sub: user.id,
+                email: user.email,
+                role: user.role,
+            };
+            const tokens = await (0, auth_utils_1.getTokens)(this.jwtService, user.id, user.email, user.role);
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+            return res.redirect(`${frontendUrl}/auth/callback?token=${tokens.access_token}`);
+        }
+        catch (error) {
+            console.error('Google login error:', error);
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+            return res.redirect(`${frontendUrl}/login?error=google_login_failed`);
+        }
     }
     async refreshToken(token, res) {
         const result = await this.authService.refreshTokens(token);
@@ -173,6 +201,24 @@ let AuthController = class AuthController {
 exports.AuthController = AuthController;
 __decorate([
     (0, public_decorators_1.Public)(),
+    (0, common_1.Get)('google'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "googleAuth", null);
+__decorate([
+    (0, public_decorators_1.Public)(),
+    (0, common_1.Get)('google/callback'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "googleAuthCallback", null);
+__decorate([
+    (0, public_decorators_1.Public)(),
     (0, common_1.Post)('refresh-token'),
     (0, swagger_1.ApiOperation)({
         summary: 'Refresh JWT tokens',
@@ -282,6 +328,6 @@ __decorate([
 ], AuthController.prototype, "resetPassword", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
-    __metadata("design:paramtypes", [auth_service_1.AuthService])
+    __metadata("design:paramtypes", [auth_service_1.AuthService, jwt_1.JwtService, prisma_service_1.PrismaService])
 ], AuthController);
 //# sourceMappingURL=auth.controller.js.map

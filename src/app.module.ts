@@ -13,7 +13,7 @@ import { StripeModule } from './module/stripe/stripe.module';
 import { StripeController } from './module/stripe/stripe.controller';
 
 @Module({
-  imports: [ MailerModule.forRootAsync({
+  imports: [ConfigModule.forRoot({isGlobal:true}), MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -30,7 +30,7 @@ import { StripeController } from './module/stripe/stripe.controller';
           from: config.get<string>('SMTP_FROM') || config.get<string>('SMTP_USER'),
         },
       }),
-    }),AuthModule, PrismaModule, MailModule, PartnerModule, AstroligicalProfileModule, StripeModule],
+    }),AuthModule, PrismaModule, MailModule, PartnerModule, AstroligicalProfileModule, StripeModule  ],
   controllers: [AppController, StripeController],
   providers: [AppService , SeederService],
 })

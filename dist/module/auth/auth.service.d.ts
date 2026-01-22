@@ -11,6 +11,30 @@ export declare class AuthService {
     private jwtService;
     private mailerService;
     constructor(prisma: PrismaService, jwtService: JwtService, mailerService: MailerService);
+    handleGoogleLogin(googleProfile: {
+        googleId: string;
+        email: string;
+        fullName: string;
+        profileImage: string | null;
+    }): Promise<{
+        email: string;
+        password: string;
+        id: string;
+        role: import("@prisma/client").$Enums.userRole;
+        createdAt: Date;
+        fullName: string;
+        birthDate: string | null;
+        birthTime: string | null;
+        birthLocation: string | null;
+        timeZone: string | null;
+        googleId: string | null;
+        profileImage: string | null;
+        phone: string | null;
+        stripeCustomerId: string | null;
+        isActive: boolean;
+        isDeleted: boolean;
+        updatedAt: Date;
+    }>;
     register(dto: RegisterDto): Promise<{
         access_token: string;
         refresh_token: string;
@@ -25,8 +49,9 @@ export declare class AuthService {
             birthTime: string | null;
             birthLocation: string | null;
             timeZone: string | null;
-            phone: string | null;
+            googleId: string | null;
             profileImage: string | null;
+            phone: string | null;
             stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
@@ -47,8 +72,9 @@ export declare class AuthService {
             birthTime: string | null;
             birthLocation: string | null;
             timeZone: string | null;
-            phone: string | null;
+            googleId: string | null;
             profileImage: string | null;
+            phone: string | null;
             stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
@@ -80,8 +106,9 @@ export declare class AuthService {
             birthTime: string | null;
             birthLocation: string | null;
             timeZone: string | null;
-            phone: string | null;
+            googleId: string | null;
             profileImage: string | null;
+            phone: string | null;
             stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
@@ -100,8 +127,9 @@ export declare class AuthService {
             birthTime: string | null;
             birthLocation: string | null;
             timeZone: string | null;
-            phone: string | null;
+            googleId: string | null;
             profileImage: string | null;
+            phone: string | null;
             stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;
@@ -120,8 +148,9 @@ export declare class AuthService {
             birthTime: string | null;
             birthLocation: string | null;
             timeZone: string | null;
-            phone: string | null;
+            googleId: string | null;
             profileImage: string | null;
+            phone: string | null;
             stripeCustomerId: string | null;
             isActive: boolean;
             isDeleted: boolean;

@@ -5,9 +5,15 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import type { Request, Response } from 'express';
 import { RegisterDto } from './dto/register.dto';
 import { UserBirthUpdateDto, UserUpdateDto } from './dto/update-account.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
 export declare class AuthController {
     private authService;
-    constructor(authService: AuthService);
+    private jwtService;
+    private prisma;
+    constructor(authService: AuthService, jwtService: JwtService, prisma: PrismaService);
+    googleAuth(): void;
+    googleAuthCallback(req: Request, res: Response): Promise<void>;
     refreshToken(token: string, res: Response): Promise<void>;
     register(dto: RegisterDto, res: Response): Promise<void>;
     login(dto: LoginDto, res: Response): Promise<void>;

@@ -25,7 +25,7 @@ let AppModule = class AppModule {
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [mailer_1.MailerModule.forRootAsync({
+        imports: [config_1.ConfigModule.forRoot({ isGlobal: true }), mailer_1.MailerModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
                 useFactory: (config) => ({

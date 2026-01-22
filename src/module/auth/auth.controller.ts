@@ -8,6 +8,7 @@ import {
   Put,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -24,13 +25,59 @@ import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
 import { UserBirthUpdateDto, UserUpdateDto } from './dto/update-account.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { userRole } from '@prisma/client';
+import { User, userRole } from '@prisma/client';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { PrismaService } from '../prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import { getTokens } from './auth.utils';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private jwtService: JwtService, private prisma: PrismaService) { }
 
+  @Public()
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleAuth() { }
+
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthCallback(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      const { user: googleProfile } = req; // comes from GoogleStrategy.validate()
+
+      // Call your service to find or create user
+      const user = await this.authService.handleGoogleLogin(googleProfile as any);
+
+      // Generate JWT payload
+      const payload = {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+      };
+
+      const tokens = await getTokens(
+        this.jwtService,
+        user.id,
+        user.email,
+        user.role,
+      );
+      // Redirect to frontend with token (e.g., http://localhost:3001/auth/callback?token=...)
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      return res.redirect(`${frontendUrl}/auth/callback?token=${tokens.access_token}`);
+    } catch (error) {
+      console.error('Google login error:', error);
+      // Redirect to login with error
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      return res.redirect(`${frontendUrl}/login?error=google_login_failed`);
+    }
+  }
   // refresh token
   @Public()
   @Post('refresh-token')
@@ -77,7 +124,7 @@ export class AuthController {
   async register(@Body() dto: RegisterDto, @Res() res: Response) {
     const result = await this.authService.register(dto);
 
-     res.cookie('accessToken', result.access_token, {
+    res.cookie('accessToken', result.access_token, {
       httpOnly: false, // Prevents client-side access to the cookie
       secure: false, // Only true for HTTPS
       maxAge: 86400000, // 1 day expiration
@@ -171,7 +218,7 @@ export class AuthController {
 
 
   @Get('current-user')
-  async currentUser(@Req() req: Request,@Res() res: Response) {
+  async currentUser(@Req() req: Request, @Res() res: Response) {
     const users = await this.authService.currentUser(req.user!.id);
     return sendResponse(res, {
       statusCode: HttpStatus.OK,

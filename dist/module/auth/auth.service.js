@@ -46,6 +46,7 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const bcrypt = __importStar(require("bcrypt"));
+const crypto_1 = require("crypto");
 const jwt_1 = require("@nestjs/jwt");
 const auth_utils_1 = require("./auth.utils");
 const mailer_1 = require("@nestjs-modules/mailer");
@@ -58,6 +59,39 @@ let AuthService = class AuthService {
         this.prisma = prisma;
         this.jwtService = jwtService;
         this.mailerService = mailerService;
+    }
+    async handleGoogleLogin(googleProfile) {
+        const { googleId, email, fullName, profileImage } = googleProfile;
+        let user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+        if (!user) {
+            user = await this.prisma.user.create({
+                data: {
+                    googleId,
+                    email,
+                    fullName,
+                    profileImage,
+                    password: await bcrypt.hash((0, crypto_1.randomBytes)(32).toString('hex'), 10),
+                    role: 'USER',
+                    isActive: false,
+                    isDeleted: false,
+                },
+            });
+        }
+        else if (!user.googleId) {
+            user = await this.prisma.user.update({
+                where: { id: user.id },
+                data: { googleId },
+            });
+        }
+        if (profileImage && user.profileImage !== profileImage) {
+            user = await this.prisma.user.update({
+                where: { id: user.id },
+                data: { profileImage },
+            });
+        }
+        return user;
     }
     async register(dto) {
         const existingUser = await this.prisma.user.findUnique({

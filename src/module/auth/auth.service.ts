@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/module/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 // import { RegisterDto } from './dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
@@ -35,32 +36,49 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private mailerService: MailerService,
-  ) {}
+  ) { }
 
-  // reasyncgister
-  //    requestRegisterOtp(email: string) {
-  //     const user = await this.prisma.user.findUnique({ where: { email } });
-  //     if (user) {
-  //       throw new BadRequestException('Email already registered');
-  //     }
 
-  //     const code = generateOtpCode();
-  //     const hashedCode =await hashOtpCode(code);
-  //     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+  async handleGoogleLogin(googleProfile: { googleId: string; email: string; fullName: string; profileImage: string | null }) {
+    const { googleId, email, fullName, profileImage } = googleProfile;
 
-  //     await this.prisma.otpCode.create({
-  //       data: { email, code: hashedCode, expiresAt },
-  //     });
+    // 🔍 First: try to find by email (primary lookup since googleId is optional in schema)
+    let user = await this.prisma.user.findUnique({
+      where: { email },
+    });
 
-  //     await this.mailerService.sendMail({
-  //       to: email,
-  //       subject: 'Your verification code',
-  //       text: `Your OTP code is ${code}. It will expire in 5 minutes.`,
-  //     });
+    if (!user) {
+      // ✅ Create new OAuth user
+      user = await this.prisma.user.create({
+        data: {
+          googleId,
+          email,
+          fullName,
+          profileImage,
+          password: await bcrypt.hash(randomBytes(32).toString('hex'), 10), // dummy hash
+          role: 'USER',
+          isActive: false, // per your model
+          isDeleted: false,
+        },
+      });
+    } else if (!user.googleId) {
+      // 🔄 Link existing email account to Google
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { googleId },
+      });
+    }
 
-  //     return { message: 'OTP sent to your email' };
-  //   }
+    // Even if user exists, update profile image if changed
+    if (profileImage && user.profileImage !== profileImage) {
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { profileImage },
+      });
+    }
 
+    return user;
+  }
   async register(dto: RegisterDto) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -84,7 +102,7 @@ export class AuthService {
         email: dto.email,
         password: hashedPassword,
         isActive: true,
-        role : userRole.PRO_USER
+        role: userRole.PRO_USER
       },
     });
 
@@ -142,7 +160,7 @@ export class AuthService {
       // if(!user.isDeleted){
       //  throw new BadRequestException('User is blocked!');
       // }
-      return getTokens(this.jwtService,user.id, user.email, user.role);
+      return getTokens(this.jwtService, user.id, user.email, user.role);
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -174,7 +192,7 @@ export class AuthService {
     return { message: 'Password changed successfully' };
   }
 
-    // Method to get all users with specific fields
+  // Method to get all users with specific fields
   async getAllUsers() {
     const users = await this.prisma.user.findMany({
       select: {
@@ -215,7 +233,7 @@ export class AuthService {
       throw new BadRequestException('User not Found');
     }
 
-    
+
 
     return { user: existingUser };
   }
