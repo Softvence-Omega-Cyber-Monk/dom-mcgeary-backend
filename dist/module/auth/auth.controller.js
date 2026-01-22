@@ -46,13 +46,16 @@ let AuthController = class AuthController {
     async googleAuthCallback(req, res) {
         try {
             const { user: googleProfile } = req;
+            console.log(googleProfile, 'controller 1');
             const user = await this.authService.handleGoogleLogin(googleProfile);
+            console.log(googleProfile, 'controller 2');
             const payload = {
                 sub: user.id,
                 email: user.email,
                 role: user.role,
             };
             const tokens = await (0, auth_utils_1.getTokens)(this.jwtService, user.id, user.email, user.role);
+            console.log(tokens, 'controller 3');
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
             return res.redirect(`${frontendUrl}/auth/callback?token=${tokens.access_token}`);
         }

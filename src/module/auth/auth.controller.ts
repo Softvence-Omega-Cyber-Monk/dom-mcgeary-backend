@@ -51,9 +51,10 @@ export class AuthController {
   ) {
     try {
       const { user: googleProfile } = req; // comes from GoogleStrategy.validate()
-
+      console.log(googleProfile , 'controller 1')
       // Call your service to find or create user
       const user = await this.authService.handleGoogleLogin(googleProfile as any);
+             console.log(googleProfile , 'controller 2')
 
       // Generate JWT payload
       const payload = {
@@ -68,6 +69,7 @@ export class AuthController {
         user.email,
         user.role,
       );
+            console.log(tokens , 'controller 3')
       // Redirect to frontend with token (e.g., http://localhost:3001/auth/callback?token=...)
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
       return res.redirect(`${frontendUrl}/auth/callback?token=${tokens.access_token}`);

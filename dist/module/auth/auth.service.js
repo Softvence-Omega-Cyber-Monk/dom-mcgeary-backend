@@ -65,6 +65,7 @@ let AuthService = class AuthService {
         let user = await this.prisma.user.findUnique({
             where: { email },
         });
+        console.log(user);
         if (!user) {
             user = await this.prisma.user.create({
                 data: {
@@ -91,6 +92,7 @@ let AuthService = class AuthService {
                 data: { profileImage },
             });
         }
+        console.log(user);
         return user;
     }
     async register(dto) {

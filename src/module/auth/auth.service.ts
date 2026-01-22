@@ -47,6 +47,7 @@ export class AuthService {
       where: { email },
     });
 
+    console.log(user)
     if (!user) {
       // ✅ Create new OAuth user
       user = await this.prisma.user.create({
@@ -76,6 +77,7 @@ export class AuthService {
         data: { profileImage },
       });
     }
+        console.log(user)
 
     return user;
   }
