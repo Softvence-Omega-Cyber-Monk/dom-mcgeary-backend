@@ -52,7 +52,7 @@ export class StripeService {
         data: {
           name: productName,
           description: description || '',
-          priceCents: amount ,
+          priceCents: amount,
           currency,
           interval,
           features: features as any, // Prisma Json type accepts array/object
@@ -338,7 +338,7 @@ export class StripeService {
           select: {
             id: true,
             email: true,
-            fullName:true
+            fullName: true
           },
         },
       },
@@ -349,21 +349,21 @@ export class StripeService {
   }
 
   // Optional: Get subscriptions for current user
-async findSubscriptionById(subscriptionId: string) {
-  return this.prisma.subscription.findFirst({
-    where: {
-      id: subscriptionId,
-      
-    },
-     include: {
+  async findSubscriptionById(subscriptionId: string) {
+    return this.prisma.subscription.findFirst({
+      where: {
+        id: subscriptionId,
+
+      },
+      include: {
         user: {
           select: {
             id: true,
             email: true,
-            fullName:true
+            fullName: true
           },
         },
       },
-  });
-}
+    });
+  }
 }
