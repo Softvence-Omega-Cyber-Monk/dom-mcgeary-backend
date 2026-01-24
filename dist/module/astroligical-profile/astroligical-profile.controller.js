@@ -44,6 +44,15 @@ let AstroligicalProfileController = class AstroligicalProfileController {
             data: result.astrologicalProfile,
         });
     }
+    async updateAstrologicalProfile(dto, req, res) {
+        const result = await this.AstroligicalProfileService.updateAstrologicalProfile(req.user.id, dto);
+        return (0, sendResponse_1.default)(res, {
+            statusCode: common_1.HttpStatus.OK,
+            success: true,
+            message: result.message,
+            data: result.astrologicalProfile,
+        });
+    }
 };
 exports.AstroligicalProfileController = AstroligicalProfileController;
 __decorate([
@@ -69,6 +78,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AstroligicalProfileController.prototype, "getAastrologicanProfile", null);
+__decorate([
+    (0, common_1.Patch)('update-astrological-profile'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update an existing astrological profile' }),
+    (0, swagger_1.ApiBody)({ type: asroligical_profile_dto_1.UpdateAstrologicalProfileDto }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [asroligical_profile_dto_1.UpdateAstrologicalProfileDto, Object, Object]),
+    __metadata("design:returntype", Promise)
+], AstroligicalProfileController.prototype, "updateAstrologicalProfile", null);
 exports.AstroligicalProfileController = AstroligicalProfileController = __decorate([
     (0, common_1.Controller)('astroligical-profile'),
     __metadata("design:paramtypes", [astroligical_profile_service_1.AstroligicalProfileService])

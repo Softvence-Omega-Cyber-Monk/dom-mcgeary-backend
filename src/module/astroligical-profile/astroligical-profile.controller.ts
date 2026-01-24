@@ -3,12 +3,13 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { CreateAstrologicalProfileDto } from './dto/asroligical-profile.dto';
+import { CreateAstrologicalProfileDto, UpdateAstrologicalProfileDto } from './dto/asroligical-profile.dto';
 import type { Request, Response } from 'express';
 import sendResponse from '../utils/sendResponse';
 import { AstroligicalProfileService } from './astroligical-profile.service';
@@ -46,6 +47,27 @@ export class AstroligicalProfileController {
   async getAastrologicanProfile(@Req() req: Request, @Res() res: Response) {
     const result = await this.AstroligicalProfileService.getAstrologicalProfile(
       req.user!.id,
+    );
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: result.message,
+      data: result.astrologicalProfile,
+    });
+  }
+
+    // ✨ NEW UPDATE ENDPOINT
+  @Patch('update-astrological-profile')
+  @ApiOperation({ summary: 'Update an existing astrological profile' })
+  @ApiBody({ type: UpdateAstrologicalProfileDto })
+  async updateAstrologicalProfile(
+    @Body() dto: UpdateAstrologicalProfileDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const result = await this.AstroligicalProfileService.updateAstrologicalProfile(
+      req.user!.id,
+      dto,
     );
     return sendResponse(res, {
       statusCode: HttpStatus.OK,

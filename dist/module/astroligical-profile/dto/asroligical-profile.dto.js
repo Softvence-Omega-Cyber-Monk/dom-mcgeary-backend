@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateAstrologicalProfileDto = void 0;
+exports.UpdateAstrologicalProfileDto = exports.CreateAstrologicalProfileDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateAstrologicalProfileDto {
@@ -93,4 +93,98 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateAstrologicalProfileDto.prototype, "userId", void 0);
+const class_transformer_1 = require("class-transformer");
+class UpdateAstrologicalProfileDto {
+    birth_date;
+    birth_time;
+    birth_location;
+    western_sign;
+    chinese_sign;
+    result;
+    roadmap_overview;
+}
+exports.UpdateAstrologicalProfileDto = UpdateAstrologicalProfileDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'User\'s birth date in YYYY-MM-DD format',
+        example: '1990-05-15',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateAstrologicalProfileDto.prototype, "birth_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'User\'s birth time in HH:mm format (24-hour)',
+        example: '14:30',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateAstrologicalProfileDto.prototype, "birth_time", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'User\'s birth location (city, country)',
+        example: 'New York, USA',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateAstrologicalProfileDto.prototype, "birth_location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Western zodiac sign (e.g., Taurus, Leo)',
+        example: 'Taurus',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateAstrologicalProfileDto.prototype, "western_sign", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Chinese zodiac sign (e.g., Dragon, Rabbit)',
+        example: 'Dragon',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateAstrologicalProfileDto.prototype, "chinese_sign", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Detailed astrological calculation result object',
+        type: Object,
+        required: false,
+        example: {
+            sun_sign: 'Taurus',
+            moon_sign: 'Cancer',
+            rising_sign: 'Virgo',
+            elements: { fire: 2, earth: 3, air: 1, water: 2 },
+        },
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    (0, class_transformer_1.Type)(() => Object),
+    __metadata("design:type", Object)
+], UpdateAstrologicalProfileDto.prototype, "result", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Roadmap overview containing personalized insights',
+        type: Object,
+        required: false,
+        example: {
+            career: 'Strong potential in creative fields...',
+            relationships: 'Harmonious connections expected...',
+            health: 'Focus on stress management...',
+        },
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    (0, class_transformer_1.Type)(() => Object),
+    __metadata("design:type", Object)
+], UpdateAstrologicalProfileDto.prototype, "roadmap_overview", void 0);
 //# sourceMappingURL=asroligical-profile.dto.js.map

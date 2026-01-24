@@ -34,7 +34,9 @@ let AstroligicalProfileService = class AstroligicalProfileService {
             western_sign: dto.western_sign ?? dto.western_sign,
             chinese_sign: dto.chinese_sign ?? dto.chinese_sign,
             result: dto.result ?? undefined,
-            roadmap_overview: dto.roadmap_overview ?? dto.roadmap_overview ?? undefined,
+            roadmap_overview: dto.roadmap_overview ??
+                dto.roadmap_overview ??
+                undefined,
             userId: userId,
         };
         const newAstrologicalProfile = await this.prisma.astrologicalProfile.create({
@@ -55,6 +57,37 @@ let AstroligicalProfileService = class AstroligicalProfileService {
         return {
             astrologicalProfile: existingPartner,
             message: 'Partner Retrieved Successfully',
+        };
+    }
+    async updateAstrologicalProfile(userId, dto) {
+        const existingProfile = await this.prisma.astrologicalProfile.findUnique({
+            where: { userId },
+        });
+        if (!existingProfile) {
+            throw new common_1.BadRequestException('Astrological profile does not exist for this user. Please create one first.');
+        }
+        const data = {};
+        if (dto.birth_date !== undefined)
+            data.birth_date = dto.birth_date;
+        if (dto.birth_time !== undefined)
+            data.birth_time = dto.birth_time;
+        if (dto.birth_location !== undefined)
+            data.birth_location = dto.birth_location;
+        if (dto.western_sign !== undefined)
+            data.western_sign = dto.western_sign;
+        if (dto.chinese_sign !== undefined)
+            data.chinese_sign = dto.chinese_sign;
+        if (dto.result !== undefined)
+            data.result = dto.result;
+        if (dto.roadmap_overview !== undefined)
+            data.roadmap_overview = dto.roadmap_overview;
+        const updatedProfile = await this.prisma.astrologicalProfile.update({
+            where: { userId },
+            data,
+        });
+        return {
+            astrologicalProfile: updatedProfile,
+            message: 'Astrological profile updated successfully',
         };
     }
 };
