@@ -21,6 +21,7 @@ services:
 
   app:
     build: .
+    image: softvence/dom_app:latest
     container_name: dom_app
     ports:
       - "6000:5000" # NestJS API
