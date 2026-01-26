@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:17
+    container_name: dom_db
+    restart: always
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dom_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d dom_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dom_network
+
+  app:
+    build: .
+    container_name: dom_app
+    ports:
+      - "6000:5000" # NestJS API
+    env_file:
+      - .env
+    environment:
+      # This overrides any DATABASE_URL in your .env to ensure Docker connectivity
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/dom_db?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dom_network
+    command: >
+      sh -c " echo 'Waiting for database to be fully functional...' && sleep 3 && npx prisma migrate deploy && node dist/main.js "
+    volumes:
+      - ./uploads:/app/uploads
+      - ./media:/app/media
+
+networks:
+  dom_network:
+    driver: bridge
+
+volumes:
+  pg_data:
