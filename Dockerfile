@@ -1,21 +1,21 @@
-FROM node:20-alpine AS builder
+FROM node:24-slim AS builder
 
-RUN apk add --no-cache ffmpeg bash openssl
+RUN apt-get update && apt-get install -y bash openssl
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 
 COPY . .
-RUN npx prisma generate
+
 RUN npm run build
 
 
 # ================== RUNTIME ==================
-FROM node:20-alpine
+FROM node:24-slim
 
 # INSTALL FFMPEG HERE (THIS IS THE FIX)
-RUN apk add --no-cache ffmpeg bash openssl
+RUN apt-get update && apt-get install -y bash openssl
 
 WORKDIR /app
 
